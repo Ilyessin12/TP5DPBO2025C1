@@ -219,11 +219,9 @@ public class Menu extends JFrame{
             faction = "Committee of 300";
         }
 
+        //sql statement untuk insert data
         String sql = "INSERT INTO mahasiswa VALUES (null, '" + nim + "', '" + nama + "', '" + jenisKelamin + "', '" + faction + "')";
         database.InsertUpdateDeleteQuery(sql);
-
-        // tambahkan data ke dalam list
-        listMahasiswa.add(new Mahasiswa(nim, nama, jenisKelamin, faction));
 
         // update tabel
         mahasiswaTable.setModel(setTable());
@@ -254,11 +252,12 @@ public class Menu extends JFrame{
             faction = "Committee of 300";
         }
 
-        // ubah data mahasiswa di list
-        listMahasiswa.get(selectedIndex).setNama(nama);
-        listMahasiswa.get(selectedIndex).setNim(nim);
-        listMahasiswa.get(selectedIndex).setJenisKelamin(jenisKelamin);
-        listMahasiswa.get(selectedIndex).setFaction(faction);
+        //kasus jika ganti NIM, ambil NIM asli dari data yang dipilih
+        String originalNim = mahasiswaTable.getModel().getValueAt(selectedIndex, 1).toString();
+
+        //sql statement untuk update data
+        String sql = "UPDATE mahasiswa SET nim = '" + nim + "', nama = '" + nama + "', jenis_kelamin = '" + jenisKelamin + "', faction = '" + faction + "' WHERE nim = '" + originalNim + "'";
+        database.InsertUpdateDeleteQuery(sql);
 
         // update tabel
         mahasiswaTable.setModel(setTable());
@@ -274,8 +273,12 @@ public class Menu extends JFrame{
     }
 
     public void deleteData() {
-        // hapus data dari list
-        listMahasiswa.remove(selectedIndex);
+        //ambil nim dari mahasiswa yang dipilih
+        String nim = nimField.getText();
+
+        //sql statement untuk delete data
+        String sql = "DELETE FROM mahasiswa WHERE nim = '" + nim + "'";
+        database.InsertUpdateDeleteQuery(sql);
 
         // update tabel
         mahasiswaTable.setModel(setTable());
