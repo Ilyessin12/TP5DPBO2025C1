@@ -202,6 +202,11 @@ public class Menu extends JFrame{
     }
 
     public void insertData() {
+        //ambil dulu semua data yang ada di form
+        if(!validateInputForm()){
+            return;
+        }
+
         // ambil value dari textfield dan combobox
         String nim = nimField.getText();
         String nama = namaField.getText();
@@ -217,6 +222,18 @@ public class Menu extends JFrame{
         }
         else if(factionRadioButton3.isSelected()){
             faction = "Committee of 300";
+        }
+
+        //mengecek apakah nim yang dimasukkan sudah ada atau belum, jika sudah maka tampilkan pesan error
+        try{
+            ResultSet resultSet = database.selectQuery("SELECT * FROM mahasiswa WHERE nim = '" + nim + "'");
+            if(resultSet.next()){
+                JOptionPane.showMessageDialog(null, "NIM sudah ada bruhh, Ad Astra");
+                return;
+            }
+        }
+        catch (SQLException e){
+            throw new RuntimeException(e);
         }
 
         //sql statement untuk insert data
@@ -235,6 +252,10 @@ public class Menu extends JFrame{
     }
 
     public void updateData() {
+        //validasi input form
+        if(!validateInputForm()){
+            return;
+        }
         // ambil data dari form
         String nim = nimField.getText();
         String nama = namaField.getText();
@@ -254,6 +275,18 @@ public class Menu extends JFrame{
 
         //kasus jika ganti NIM, ambil NIM asli dari data yang dipilih
         String originalNim = mahasiswaTable.getModel().getValueAt(selectedIndex, 1).toString();
+
+        //mengecek apakah nim yang dimasukkan sudah ada atau belum, jika sudah maka tampilkan pesan error
+        try{
+            ResultSet resultSet = database.selectQuery("SELECT * FROM mahasiswa WHERE nim = '" + nim + "'");
+            if(resultSet.next() && !nim.equals(originalNim)){
+                JOptionPane.showMessageDialog(null, "NIM sudah ada bruhh, Ad Astra");
+                return;
+            }
+        }
+        catch (SQLException e){
+            throw new RuntimeException(e);
+        }
 
         //sql statement untuk update data
         String sql = "UPDATE mahasiswa SET nim = '" + nim + "', nama = '" + nama + "', jenis_kelamin = '" + jenisKelamin + "', faction = '" + faction + "' WHERE nim = '" + originalNim + "'";
@@ -308,5 +341,30 @@ public class Menu extends JFrame{
         deleteButton.setVisible(false);
         // ubah selectedIndex menjadi -1 (tidak ada baris yang dipilih)
         selectedIndex = -1;
+    }
+
+    public boolean validateInputForm(){
+        //cek apakah ada field yang kosong
+        //pertama, nim
+        if(nimField.getText().trim().isEmpty()){
+            JOptionPane.showMessageDialog(null, "NIM tidak boleh kosong, Shining edge of the new world");
+            return false;
+        }
+        //kedua, nama
+        if(namaField.getText().trim().isEmpty()){
+            JOptionPane.showMessageDialog(null, "Nama tidak boleh kosong, Tarnished");
+            return false;
+        }
+        //ketiga, jenis kelamin
+        if(jenisKelaminComboBox.getSelectedItem().toString().isEmpty()){
+            JOptionPane.showMessageDialog(null, "Jenis Kelamin tidak boleh kosong, Good Hunter");
+            return false;
+        }
+        //keempat, faction
+        if(!factionRadioButton1.isSelected() && !factionRadioButton2.isSelected() && !factionRadioButton3.isSelected()){
+            JOptionPane.showMessageDialog(null, "Faction harus dipilih, Ashen one");
+            return false;
+        }
+        return true;
     }
 }
